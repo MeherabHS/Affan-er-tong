@@ -63,10 +63,16 @@ export function escapeHtml(str: string): string {
 export async function verifyTurnstileCaptcha(token?: string | null): Promise<boolean> {
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
 
-  if (token === "DEV_MODE_TOKEN" || !secretKey || secretKey.trim() === "") {
-    if (process.env.NODE_ENV === "production" && secretKey && secretKey.trim() !== "") {
+  // If Turnstile secret key is not configured in env, allow in non-production
+  if (!secretKey || secretKey.trim() === "") {
+    if (process.env.NODE_ENV === "production") {
       return false;
     }
+    return true;
+  }
+
+  // Allow dev mode token bypass
+  if (token === "DEV_MODE_TOKEN") {
     return true;
   }
 
