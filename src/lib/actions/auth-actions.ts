@@ -6,9 +6,11 @@ import {
   signInSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  emailSchema,
   getSafeRedirect,
 } from "@/lib/validations/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getSiteUrl } from "@/lib/site-url";
 
 export interface ActionResult {
   success: boolean;
@@ -56,8 +58,8 @@ export async function signUpClientAction(formData: unknown): Promise<ActionResul
   }
 
   try {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const emailRedirectTo = `${origin}/auth/callback`;
+    const siteUrl = getSiteUrl();
+    const emailRedirectTo = `${siteUrl}/auth/callback?next=/modules`;
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -247,8 +249,8 @@ export async function forgotPasswordClientAction(formData: unknown): Promise<Act
   }
 
   try {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const redirectTo = `${origin}/reset-password`;
+    const siteUrl = getSiteUrl();
+    const redirectTo = `${siteUrl}/auth/callback?next=/reset-password`;
 
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
@@ -261,6 +263,57 @@ export async function forgotPasswordClientAction(formData: unknown): Promise<Act
   return {
     success: true,
     message: "If an account exists for this email, password-reset instructions will be sent.",
+  };
+}
+
+/**
+ * RESEND VERIFICATION ACTION
+ */
+export async function resendVerificationClientAction(email: string): Promise<ActionResult> {
+  const result = emailSchema.safeParse(email);
+
+  if (!result.success) {
+    return {
+      success: false,
+      message: "Please provide a valid email address.",
+    };
+  }
+
+  const validEmail = result.data;
+  const rateResult = checkRateLimit(validEmail);
+  if (!rateResult.isAllowed) {
+    return {
+      success: false,
+      message: "Too many requests. Please try again later.",
+    };
+  }
+
+  const supabase = createClient();
+  if (!supabase) {
+    return {
+      success: false,
+      message: "Authentication service is unavailable.",
+    };
+  }
+
+  try {
+    const siteUrl = getSiteUrl();
+    const emailRedirectTo = `${siteUrl}/auth/callback?next=/modules`;
+
+    await supabase.auth.resend({
+      type: "signup",
+      email: validEmail,
+      options: {
+        emailRedirectTo,
+      },
+    });
+  } catch (err) {
+    console.error("Resend verification error", err);
+  }
+
+  return {
+    success: true,
+    message: "If the account is eligible, a new verification email has been sent.",
   };
 }
 

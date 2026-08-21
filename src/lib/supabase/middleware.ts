@@ -38,7 +38,7 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // IMPORTANT: Do NOT use getSession() in middleware because it can be spoofed. Use getUser() for server verification.
+  // Refresh auth session
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -54,7 +54,6 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Check profile role and account status
     const { data: profile } = await supabase
       .from("profiles")
       .select("role, account_status")
@@ -68,20 +67,6 @@ export async function updateSession(request: NextRequest) {
 
     if (profile?.role !== "admin") {
       url.pathname = "/access-denied";
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // Check suspended account status for all authenticated users on application routes
-  if (user && !pathname.startsWith("/account-suspended") && !pathname.startsWith("/auth")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("account_status")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.account_status === "suspended") {
-      url.pathname = "/account-suspended";
       return NextResponse.redirect(url);
     }
   }

@@ -3,22 +3,33 @@ import { createClient } from "@/lib/supabase/server";
 import { getSafeRedirect } from "@/lib/validations/auth";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const nextRaw = searchParams.get("next");
-  const safeNext = getSafeRedirect(nextRaw, "/");
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
+  const nextRaw = requestUrl.searchParams.get("next");
+  const safeNext = getSafeRedirect(nextRaw, "/modules");
 
-  if (code) {
-    const supabase = await createClient();
-    if (supabase) {
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-      if (!error) {
-        // Redirection cleanses the code parameter from the browser address bar
-        return NextResponse.redirect(`${origin}${safeNext}`);
-      }
-    }
+  if (!code) {
+    return NextResponse.redirect(
+      new URL("/sign-in?error=missing_code", request.url)
+    );
   }
 
-  // Return to sign-in page safely if code exchange failed or expired
-  return NextResponse.redirect(`${origin}/sign-in?error=auth_callback_failed`);
+  const supabase = await createClient();
+  if (!supabase) {
+    return NextResponse.redirect(
+      new URL("/sign-in?error=service_unavailable", request.url)
+    );
+  }
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    console.error("Auth callback code exchange error:", error);
+    return NextResponse.redirect(
+      new URL("/sign-in?error=verification_failed", request.url)
+    );
+  }
+
+  // Successfully exchanged session code - redirect safely to internal next route
+  return NextResponse.redirect(new URL(safeNext, request.url));
 }

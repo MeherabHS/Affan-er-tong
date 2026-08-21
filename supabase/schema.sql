@@ -105,14 +105,24 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, display_name, role, account_status)
+  insert into public.profiles (
+    id,
+    display_name,
+    role,
+    account_status,
+    created_at,
+    updated_at
+  )
   values (
     new.id,
-    coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)),
+    nullif(trim(new.raw_user_meta_data ->> 'display_name'), ''),
     'user',
-    'active'
+    'active',
+    now(),
+    now()
   )
   on conflict (id) do nothing;
+
   return new;
 end;
 $$;
@@ -121,6 +131,20 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- 7. REPAIR EXISTING USERS MISSING PROFILES MIGRATION
+insert into public.profiles (id, display_name, role, account_status, created_at, updated_at)
+select 
+  u.id,
+  nullif(trim(u.raw_user_meta_data ->> 'display_name'), ''),
+  'user',
+  'active',
+  now(),
+  now()
+from auth.users u
+left join public.profiles p on u.id = p.id
+where p.id is null
+on conflict (id) do nothing;
 
 -- ====================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
