@@ -8,7 +8,6 @@ import {
   resetPasswordSchema,
   getSafeRedirect,
 } from "@/lib/validations/auth";
-import { verifyTurnstileCaptcha } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export interface ActionResult {
@@ -37,21 +36,13 @@ export async function signUpClientAction(formData: unknown): Promise<ActionResul
     };
   }
 
-  const { email, password, displayName, captchaToken } = result.data;
+  const { email, password, displayName } = result.data;
 
   const rateResult = checkRateLimit(email);
   if (!rateResult.isAllowed) {
     return {
       success: false,
       message: "Too many requests. Please try again later.",
-    };
-  }
-
-  const captchaValid = await verifyTurnstileCaptcha(captchaToken);
-  if (!captchaValid) {
-    return {
-      success: false,
-      message: "CAPTCHA verification failed. Please try again.",
     };
   }
 
@@ -139,21 +130,13 @@ export async function signInClientAction(formData: unknown, requestedNext?: stri
     };
   }
 
-  const { email, password, captchaToken } = result.data;
+  const { email, password } = result.data;
 
   const rateResult = checkRateLimit(email);
   if (!rateResult.isAllowed) {
     return {
       success: false,
       message: "Too many requests. Please try again later.",
-    };
-  }
-
-  const captchaValid = await verifyTurnstileCaptcha(captchaToken);
-  if (!captchaValid) {
-    return {
-      success: false,
-      message: "CAPTCHA verification failed. Please try again.",
     };
   }
 
@@ -252,15 +235,7 @@ export async function forgotPasswordClientAction(formData: unknown): Promise<Act
     };
   }
 
-  const { email, captchaToken } = result.data;
-
-  const captchaValid = await verifyTurnstileCaptcha(captchaToken);
-  if (!captchaValid) {
-    return {
-      success: false,
-      message: "CAPTCHA verification failed. Please try again.",
-    };
-  }
+  const { email } = result.data;
 
   const supabase = createClient();
 

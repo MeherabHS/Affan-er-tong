@@ -61,14 +61,6 @@ export const displayNameSchema = z
   );
 
 /**
- * CAPTCHA TOKEN SCHEMA
- */
-export const captchaTokenSchema = z
-  .string()
-  .optional()
-  .nullable();
-
-/**
  * SIGN UP FORM SCHEMA
  */
 export const signUpSchema = z
@@ -77,7 +69,6 @@ export const signUpSchema = z
     email: emailSchema,
     password: passwordSchema,
     confirmPassword: z.string(),
-    captchaToken: captchaTokenSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
@@ -90,7 +81,6 @@ export const signUpSchema = z
 export const signInSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
-  captchaToken: captchaTokenSchema,
 });
 
 /**
@@ -98,7 +88,6 @@ export const signInSchema = z.object({
  */
 export const forgotPasswordSchema = z.object({
   email: emailSchema,
-  captchaToken: captchaTokenSchema,
 });
 
 /**
@@ -108,7 +97,6 @@ export const resetPasswordSchema = z
   .object({
     password: passwordSchema,
     confirmPassword: z.string(),
-    captchaToken: captchaTokenSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",

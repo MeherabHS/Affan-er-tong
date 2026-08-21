@@ -5,12 +5,10 @@ import Link from "next/link";
 import { Mail, ArrowRight, ShieldCheck, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 import { forgotPasswordClientAction } from "@/lib/actions/auth-actions";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState<string>("");
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [neutralMessage, setNeutralMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -23,7 +21,6 @@ export default function ForgotPasswordPage() {
 
     const result = await forgotPasswordClientAction({
       email,
-      captchaToken,
     });
 
     if (!result.success) {
@@ -99,8 +96,6 @@ export default function ForgotPasswordPage() {
                 />
               </div>
             </div>
-
-            <TurnstileCaptcha onVerify={(token) => setCaptchaToken(token)} />
 
             <button
               type="submit"

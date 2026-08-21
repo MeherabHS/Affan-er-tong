@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { X, Mail, Lock, User, ArrowRight } from "lucide-react";
 import { signUpClientAction, signInClientAction } from "@/lib/actions/auth-actions";
-import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 
 interface UserProfile {
   email: string;
@@ -22,7 +21,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, actionIntent }: 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -49,7 +47,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, actionIntent }: 
         email,
         password,
         confirmPassword: password,
-        captchaToken,
       });
 
       if (!result.success) {
@@ -69,7 +66,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, actionIntent }: 
       const result = await signInClientAction({
         email,
         password,
-        captchaToken,
       });
 
       if (!result.success) {
@@ -178,11 +174,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, actionIntent }: 
             </div>
           </div>
 
-          <TurnstileCaptcha
-            onVerify={(token) => setCaptchaToken(token)}
-            onExpire={() => setCaptchaToken(null)}
-          />
-
           <button
             type="submit"
             disabled={loading}
@@ -199,7 +190,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, actionIntent }: 
             onClick={() => {
               setIsSignUp(!isSignUp);
               setErrorMessage("");
-              setCaptchaToken(null);
             }}
             className="text-[#171717] hover:underline font-bold py-2"
           >

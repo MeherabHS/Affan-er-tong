@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 import { signInClientAction } from "@/lib/actions/auth-actions";
 import { getSafeRedirect } from "@/lib/validations/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -20,7 +19,6 @@ function SignInContent() {
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -50,7 +48,6 @@ function SignInContent() {
       {
         email,
         password,
-        captchaToken,
       },
       nextPath
     );
@@ -155,8 +152,6 @@ function SignInContent() {
                 </button>
               </div>
             </div>
-
-            <TurnstileCaptcha onVerify={(token) => setCaptchaToken(token)} />
 
             <button
               type="submit"

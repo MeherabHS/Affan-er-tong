@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 import { signUpClientAction } from "@/lib/actions/auth-actions";
 import { evaluatePasswordStrength } from "@/lib/validations/auth";
 
@@ -27,7 +26,6 @@ export default function SignUpPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
@@ -55,7 +53,6 @@ export default function SignUpPage() {
       email,
       password,
       confirmPassword,
-      captchaToken,
     });
 
     if (!result.success) {
@@ -277,8 +274,6 @@ export default function SignUpPage() {
                 <p className="text-[11px] text-red-600 font-bold mt-1">{fieldErrors.confirmPassword}</p>
               )}
             </div>
-
-            <TurnstileCaptcha onVerify={(token) => setCaptchaToken(token)} />
 
             <button
               type="submit"

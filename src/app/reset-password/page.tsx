@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle, CheckCircle2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 import { resetPasswordClientAction } from "@/lib/actions/auth-actions";
 import { evaluatePasswordStrength } from "@/lib/validations/auth";
 
@@ -14,7 +13,6 @@ export default function ResetPasswordPage() {
 
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
@@ -34,7 +32,6 @@ export default function ResetPasswordPage() {
     const result = await resetPasswordClientAction({
       password,
       confirmPassword,
-      captchaToken,
     });
 
     if (!result.success) {
@@ -180,8 +177,6 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
             </div>
-
-            <TurnstileCaptcha onVerify={(token) => setCaptchaToken(token)} />
 
             <button
               type="submit"
