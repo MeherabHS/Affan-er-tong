@@ -18,7 +18,7 @@ export default function NotFound() {
   return (
     <div className="min-h-[100dvh] flex flex-col justify-between bg-[#F5F0E6] text-[#171717] font-sans paper-grain selection:bg-[#E87525] selection:text-[#F5F0E6]">
       {/* Simplified Branded Header */}
-      <header className="py-5 px-4 sm:px-8 lg:px-16 border-b border-[rgba(23,23,23,0.08)] bg-[#F5F0E6]">
+      <header className="py-5 px-4 sm:px-8 lg:px-16 border-b border-[#171717]/10 bg-[#F5F0E6]">
         <div className="max-w-[1440px] mx-auto flex items-center justify-between">
           <Link
             href="/"
@@ -183,7 +183,7 @@ export default function NotFound() {
       </main>
 
       {/* Minimal Branded Footer */}
-      <footer className="py-5 px-4 sm:px-8 border-t border-[rgba(23,23,23,0.08)] bg-[#F5F0E6]">
+      <footer className="py-5 px-4 sm:px-8 border-t border-[#171717]/10 bg-[#F5F0E6]">
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left font-sans text-xs text-[#171717]/60">
           <div>
             © {new Date().getFullYear()} Affan er Tong • Debate learning over conversation and tea.

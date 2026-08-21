@@ -125,7 +125,7 @@ export default function Header({ user, onOpenAuth: _onOpenAuth, onSignOut, onFil
   const displayName = user ? getCleanDisplayName(user.name, user.email) : "";
 
   return (
-    <header className="sticky top-0 z-50 bg-[#F5F0E6] border-b border-[rgba(23,23,23,0.08)] text-[#171717] h-18 sm:h-20 flex items-center">
+    <header className="sticky top-0 z-50 bg-[#F5F0E6] border-b border-[#171717]/10 text-[#171717] h-18 sm:h-20 flex items-center">
       {/* Skip to Content */}
       <a
         href="#main-content"
