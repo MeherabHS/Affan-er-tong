@@ -86,13 +86,21 @@ export default function Header({ user, onOpenAuth: _onOpenAuth, onSignOut, onFil
   }, [pathname]);
 
   const isNavItemActive = (item: NavItem) => {
-    if (item.type === "section") {
-      return pathname === "/" && activeSection === item.sectionId;
+    const normalizedPathname = pathname.replace(/\/$/, "") || "/";
+
+    if (item.href.startsWith("/#")) {
+      return normalizedPathname === "/" && activeSection === item.sectionId;
     }
-    if (item.href === "/") {
-      return pathname === "/";
+
+    const normalizedHref = item.href.replace(/\/$/, "") || "/";
+    if (normalizedHref === "/") {
+      return normalizedPathname === "/";
     }
-    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+    return (
+      normalizedPathname === normalizedHref ||
+      normalizedPathname.startsWith(`${normalizedHref}/`)
+    );
   };
 
   const getCleanDisplayName = (name: string, email: string) => {
@@ -117,7 +125,7 @@ export default function Header({ user, onOpenAuth: _onOpenAuth, onSignOut, onFil
   const displayName = user ? getCleanDisplayName(user.name, user.email) : "";
 
   return (
-    <header className="sticky top-0 z-50 bg-[#F5F0E6] border-b border-[#171717]/10 text-[#171717] h-18 sm:h-20 flex items-center shadow-[0_1px_0_rgba(23,23,23,0.05)]">
+    <header className="sticky top-0 z-50 bg-[#F5F0E6] border-b border-[rgba(23,23,23,0.08)] text-[#171717] h-18 sm:h-20 flex items-center">
       {/* Skip to Content */}
       <a
         href="#main-content"
@@ -154,7 +162,7 @@ export default function Header({ user, onOpenAuth: _onOpenAuth, onSignOut, onFil
                   href={item.href}
                   data-active={active ? "true" : "false"}
                   aria-current={active ? (item.type === "section" ? "location" : "page") : undefined}
-                  className="nav-link py-2 px-1 min-h-[44px] inline-flex items-center font-condensed text-sm tracking-wider"
+                  className={`nav-link ${active ? "nav-link--active" : "nav-link--inactive"} font-condensed text-sm tracking-wider`}
                 >
                   {item.label}
                 </Link>
@@ -272,7 +280,7 @@ export default function Header({ user, onOpenAuth: _onOpenAuth, onSignOut, onFil
                 onClick={() => setMobileMenuOpen(false)}
                 data-active={active ? "true" : "false"}
                 aria-current={active ? (item.type === "section" ? "location" : "page") : undefined}
-                className="block w-full py-3 min-h-[48px] border-b border-[#171717]/10 data-[active=true]:text-[#E87525] data-[active=true]:font-bold hover:text-[#E87525]"
+                className={`mobile-nav-link ${active ? "mobile-nav-link--active" : ""} font-condensed text-xl uppercase tracking-wider`}
               >
                 {item.label}
               </Link>
