@@ -3,15 +3,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Header from "@/components/Header";
-import HeroSection from "@/components/HeroSection";
-import MotionStrip from "@/components/MotionStrip";
-import WhyTongSection from "@/components/WhyTongSection";
-import LearningPathSection from "@/components/LearningPathSection";
-import VideoLibrarySection from "@/components/VideoLibrarySection";
 import QnASection from "@/components/QnASection";
-import CommunityCTA from "@/components/CommunityCta";
-import AboutSection from "@/components/AboutSection";
-import FAQAccordion from "@/components/FAQAccordion";
 import Footer from "@/components/Footer";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
@@ -25,13 +17,15 @@ interface UserProfile {
   role?: string;
 }
 
-export default function Home() {
+export default function OpenFloorPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authIntent, setAuthIntent] = useState<string | undefined>(undefined);
   const [showOnlyMyQuestions, setShowOnlyMyQuestions] = useState<boolean>(false);
 
   useEffect(() => {
+    document.title = "Open Floor Q&A | Affan er Tong";
+
     async function checkUser() {
       if (isSupabaseConfigured && supabase) {
         const { data } = await supabase.auth.getUser();
@@ -49,29 +43,6 @@ export default function Home() {
             role: profile?.role,
           });
         }
-
-        const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-          if (session?.user && supabase) {
-            const u = session.user;
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("role")
-              .eq("id", u.id)
-              .single();
-
-            setUser({
-              email: u.email || "",
-              name: u.user_metadata?.display_name || u.email?.split("@")[0] || "Debater",
-              role: profile?.role,
-            });
-          } else {
-            setUser(null);
-          }
-        });
-
-        return () => {
-          authListener.subscription.unsubscribe();
-        };
       }
     }
 
@@ -81,10 +52,6 @@ export default function Home() {
   const handleOpenAuth = (intent?: string) => {
     setAuthIntent(intent);
     setIsAuthModalOpen(true);
-  };
-
-  const handleAuthSuccess = (u: UserProfile) => {
-    setUser(u);
   };
 
   const handleSignOut = async () => {
@@ -97,8 +64,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F5F0E6] text-[#171717] font-sans selection:bg-[#E87525] selection:text-[#F5F0E6]">
-      
-      {/* 1. Header */}
       <Header
         user={user}
         onOpenAuth={handleOpenAuth}
@@ -106,51 +71,23 @@ export default function Home() {
         onFilterMyQuestions={() => setShowOnlyMyQuestions(true)}
       />
 
-      {/* Main Content Area */}
       <main id="main-content" className="flex-1">
-        {/* 2. Hero */}
-        <HeroSection />
-
-        {/* 3. Motion Strip */}
-        <MotionStrip />
-
-        {/* 4. Why Tong */}
-        <WhyTongSection />
-
-        {/* 5. Learning Path */}
-        <LearningPathSection />
-
-        {/* 6. Video Library */}
-        <VideoLibrarySection />
-
-        {/* 7. Open Floor */}
         <QnASection
           user={user}
           onRequireAuth={(intent) => handleOpenAuth(intent)}
           showOnlyMyQuestions={showOnlyMyQuestions}
         />
-
-        {/* 8. Join the Adda CTA */}
-        <CommunityCTA />
-
-        {/* 9. About */}
-        <AboutSection />
-
-        {/* 10. FAQ */}
-        <FAQAccordion />
       </main>
 
-      {/* Auth Modal (Dynamically Imported) */}
       {isAuthModalOpen && (
         <AuthModal
           isOpen={isAuthModalOpen}
           onClose={() => setIsAuthModalOpen(false)}
-          onSuccess={handleAuthSuccess}
+          onSuccess={(u) => setUser(u)}
           actionIntent={authIntent}
         />
       )}
 
-      {/* 11. Footer */}
       <Footer />
     </div>
   );

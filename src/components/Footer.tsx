@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { SITE_DATA } from "@/content/site";
+import { NAV_ITEMS } from "@/config/navigation";
 
 export default function Footer() {
   return (
@@ -48,21 +49,13 @@ export default function Footer() {
             <div className="space-y-3 font-condensed text-xs sm:text-sm uppercase tracking-wider">
               <div className="text-xs font-mono text-[#E87525] font-bold">NAVIGATION</div>
               <ul className="space-y-2">
-                <li>
-                  <a href="#why-tong" className="hover:text-[#E87525] transition-colors">Why Tong</a>
-                </li>
-                <li>
-                  <a href="#learning-path" className="hover:text-[#E87525] transition-colors">Learning Path</a>
-                </li>
-                <li>
-                  <a href="#video-library" className="hover:text-[#E87525] transition-colors">Video Library</a>
-                </li>
-                <li>
-                  <a href="#open-floor" className="hover:text-[#E87525] transition-colors">Open Floor</a>
-                </li>
-                <li>
-                  <a href="#about" className="hover:text-[#E87525] transition-colors">About</a>
-                </li>
+                {NAV_ITEMS.map((item) => (
+                  <li key={item.label}>
+                    <Link href={item.href} className="hover:text-[#E87525] transition-colors">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 

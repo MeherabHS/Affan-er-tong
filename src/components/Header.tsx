@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Menu, X, ArrowUpRight, LogIn, LogOut, HelpCircle, ShieldCheck } from "lucide-react";
 import { SITE_DATA } from "@/content/site";
+import { NAV_ITEMS, NavItem } from "@/config/navigation";
 
 interface UserProfile {
   email: string;
@@ -14,14 +16,16 @@ interface UserProfile {
 
 interface HeaderProps {
   user: UserProfile | null;
-  onOpenAuth: (intent?: string) => void;
+  onOpenAuth?: (intent?: string) => void;
   onSignOut: () => void;
   onFilterMyQuestions?: () => void;
 }
 
-export default function Header({ user, onOpenAuth, onSignOut, onFilterMyQuestions }: HeaderProps) {
+export default function Header({ user, onOpenAuth: _onOpenAuth, onSignOut, onFilterMyQuestions }: HeaderProps) {
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   // Lock background scroll when mobile drawer is open & handle Escape key
   useEffect(() => {
@@ -45,13 +49,50 @@ export default function Header({ user, onOpenAuth, onSignOut, onFilterMyQuestion
     };
   }, [mobileMenuOpen]);
 
-  const scrollToSection = (id: string) => {
-    setMobileMenuOpen(false);
-    setAccountMenuOpen(false);
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
+  // Homepage Section Intersection Observer
+  useEffect(() => {
+    if (pathname !== "/") {
+      setActiveSection(null);
+      return;
     }
+
+    const sectionIds = ["why-tong", "learning-path", "video-library", "open-floor", "about"];
+    const sectionElements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (sectionElements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: "-20% 0px -65% 0px",
+        threshold: 0,
+      }
+    );
+
+    sectionElements.forEach((el) => observer.observe(el));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [pathname]);
+
+  const isNavItemActive = (item: NavItem) => {
+    if (item.type === "section") {
+      return pathname === "/" && activeSection === item.sectionId;
+    }
+    if (item.href === "/") {
+      return pathname === "/";
+    }
+    return pathname === item.href || pathname.startsWith(`${item.href}/`);
   };
 
   const getCleanDisplayName = (name: string, email: string) => {
@@ -105,36 +146,20 @@ export default function Header({ user, onOpenAuth, onSignOut, onFilterMyQuestion
 
           {/* Right: Desktop Navigation (Restored at ≥ 900px) */}
           <nav className="hidden min-[900px]:flex items-center space-x-7 text-xs font-bold uppercase tracking-wider">
-            <button
-              onClick={() => scrollToSection("why-tong")}
-              className="hover:underline underline-offset-4 decoration-[#E87525] decoration-2 transition-all min-h-[44px] px-1"
-            >
-              Why Tong
-            </button>
-            <button
-              onClick={() => scrollToSection("learning-path")}
-              className="hover:underline underline-offset-4 decoration-[#E87525] decoration-2 transition-all min-h-[44px] px-1"
-            >
-              Learning Path
-            </button>
-            <button
-              onClick={() => scrollToSection("video-library")}
-              className="hover:underline underline-offset-4 decoration-[#E87525] decoration-2 transition-all min-h-[44px] px-1"
-            >
-              Video Library
-            </button>
-            <button
-              onClick={() => scrollToSection("open-floor")}
-              className="hover:underline underline-offset-4 decoration-[#E87525] decoration-2 transition-all min-h-[44px] px-1"
-            >
-              Open Floor
-            </button>
-            <button
-              onClick={() => scrollToSection("about")}
-              className="hover:underline underline-offset-4 decoration-[#E87525] decoration-2 transition-all min-h-[44px] px-1"
-            >
-              About
-            </button>
+            {NAV_ITEMS.map((item) => {
+              const active = isNavItemActive(item);
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  data-active={active ? "true" : "false"}
+                  aria-current={active ? (item.type === "section" ? "location" : "page") : undefined}
+                  className="nav-link py-2 px-1 min-h-[44px] inline-flex items-center font-condensed text-sm tracking-wider"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
 
             {/* Desktop Account Control */}
             {user ? (
@@ -168,17 +193,17 @@ export default function Header({ user, onOpenAuth, onSignOut, onFilterMyQuestion
                       </Link>
                     )}
 
-                    <button
+                    <Link
+                      href="/open-floor"
                       onClick={() => {
                         setAccountMenuOpen(false);
-                        scrollToSection("open-floor");
                         if (onFilterMyQuestions) onFilterMyQuestions();
                       }}
                       className="w-full text-left px-4 py-2.5 hover:bg-[#171717] hover:text-[#F5F0E6] flex items-center gap-2 font-bold uppercase tracking-wider text-[11px] min-h-[44px]"
                     >
                       <HelpCircle className="w-3.5 h-3.5" />
                       <span>My Questions</span>
-                    </button>
+                    </Link>
 
                     <button
                       onClick={() => {
@@ -194,13 +219,13 @@ export default function Header({ user, onOpenAuth, onSignOut, onFilterMyQuestion
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => onOpenAuth("sign in to your account")}
+              <Link
+                href="/sign-in"
                 className="text-xs font-bold border border-[#171717]/20 px-4 py-2 hover:bg-[#171717] hover:text-[#F5F0E6] transition-colors flex items-center gap-1.5 uppercase tracking-wider min-h-[44px]"
               >
                 <LogIn className="w-3.5 h-3.5 text-[#E87525]" />
                 <span>Sign In</span>
-              </button>
+              </Link>
             )}
 
             {/* Desktop Facebook Button */}
@@ -238,36 +263,21 @@ export default function Header({ user, onOpenAuth, onSignOut, onFilterMyQuestion
           id="mobile-nav-drawer"
           className="min-[900px]:hidden fixed inset-x-0 top-18 sm:top-20 bottom-0 bg-[#F5F0E6] border-b border-[#171717]/20 px-6 py-6 space-y-3 font-condensed text-xl uppercase tracking-wider shadow-2xl z-50 overflow-y-auto"
         >
-          <button
-            onClick={() => scrollToSection("why-tong")}
-            className="block w-full text-left py-3 min-h-[48px] border-b border-[#171717]/10 hover:text-[#E87525]"
-          >
-            Why Tong
-          </button>
-          <button
-            onClick={() => scrollToSection("learning-path")}
-            className="block w-full text-left py-3 min-h-[48px] border-b border-[#171717]/10 hover:text-[#E87525]"
-          >
-            Learning Path
-          </button>
-          <button
-            onClick={() => scrollToSection("video-library")}
-            className="block w-full text-left py-3 min-h-[48px] border-b border-[#171717]/10 hover:text-[#E87525]"
-          >
-            Video Library
-          </button>
-          <button
-            onClick={() => scrollToSection("open-floor")}
-            className="block w-full text-left py-3 min-h-[48px] border-b border-[#171717]/10 hover:text-[#E87525]"
-          >
-            Open Floor
-          </button>
-          <button
-            onClick={() => scrollToSection("about")}
-            className="block w-full text-left py-3 min-h-[48px] border-b border-[#171717]/10 hover:text-[#E87525]"
-          >
-            About
-          </button>
+          {NAV_ITEMS.map((item) => {
+            const active = isNavItemActive(item);
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                data-active={active ? "true" : "false"}
+                aria-current={active ? (item.type === "section" ? "location" : "page") : undefined}
+                className="block w-full py-3 min-h-[48px] border-b border-[#171717]/10 data-[active=true]:text-[#E87525] data-[active=true]:font-bold hover:text-[#E87525]"
+              >
+                {item.label}
+              </Link>
+            );
+          })}
 
           <div className="pt-4 font-sans text-sm space-y-4">
             {user ? (
@@ -289,16 +299,16 @@ export default function Header({ user, onOpenAuth, onSignOut, onFilterMyQuestion
                   )}
 
                   <div className="flex gap-2">
-                    <button
+                    <Link
+                      href="/open-floor"
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        scrollToSection("open-floor");
                         if (onFilterMyQuestions) onFilterMyQuestions();
                       }}
-                      className="flex-1 min-h-[44px] py-2 text-xs border border-[#171717]/20 font-bold uppercase text-center"
+                      className="flex-1 min-h-[44px] py-2 text-xs border border-[#171717]/20 font-bold uppercase text-center flex items-center justify-center"
                     >
                       My Questions
-                    </button>
+                    </Link>
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
@@ -312,16 +322,14 @@ export default function Header({ user, onOpenAuth, onSignOut, onFilterMyQuestion
                 </div>
               </div>
             ) : (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenAuth("sign in to your account");
-                }}
+              <Link
+                href="/sign-in"
+                onClick={() => setMobileMenuOpen(false)}
                 className="w-full min-h-[48px] py-3 border border-[#171717]/20 bg-[#E87525] text-[#F5F0E6] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Sign In / Create Account</span>
-              </button>
+              </Link>
             )}
 
             <a

@@ -80,3 +80,56 @@ h1, h2, h3, h4 {
   scrollbar-width: thin;
   scrollbar-color: #E87525 #F5F0E6;
 }
+
+/* Sticky Header Scroll Offset */
+#why-tong,
+#learning-path,
+#video-library,
+#open-floor,
+#about {
+  scroll-margin-top: 88px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Nav Link Styling & Active Indicators */
+.nav-link {
+  position: relative;
+  color: #171717;
+  transition: color 0.15s ease-in-out;
+}
+
+.nav-link:hover {
+  color: #E87525;
+}
+
+.nav-link[data-active="true"] {
+  color: #E87525;
+  font-weight: 700;
+}
+
+.nav-link[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 2px;
+  background-color: #E87525;
+}
+
+/* Accessible Focus Ring */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #E87525;
+  outline-offset: 4px;
+}
+

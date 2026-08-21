@@ -45,6 +45,25 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/sessions",
+        destination: "/modules",
+        permanent: true,
+      },
+      {
+        source: "/recordings",
+        destination: "/video-library",
+        permanent: true,
+      },
+      {
+        source: "/q-and-a",
+        destination: "/open-floor",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
