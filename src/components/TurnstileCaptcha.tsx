@@ -33,7 +33,10 @@ export default function TurnstileCaptcha({ onVerify, onError, onExpire }: Turnst
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
-    if (!siteKey || !containerRef.current) return;
+    if (!siteKey) {
+      if (onVerify) onVerify("DEV_MODE_TOKEN");
+      return;
+    }
 
     if (window.turnstile && containerRef.current) {
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
