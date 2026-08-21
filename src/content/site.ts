@@ -60,7 +60,6 @@ export const SITE_DATA = {
     sectionLabel: "03 / PARTICIPATE",
     title: "OPEN FLOOR",
     supportingText: "Questions, arguments and better ways of thinking.",
-    previewBanner: "Community Q&A feature currently in preview.",
     emptyHeading: "THE FLOOR IS OPEN.",
     emptyText: "Ask the first question and begin a thoughtful conversation.",
     emptyButtonText: "ASK A QUESTION",

@@ -277,11 +277,6 @@ export default function QnASection({ user, onRequireAuth, showOnlyMyQuestions = 
     <section id="open-floor" className="bg-[#F5F0E6] text-[#171717] py-12 md:py-20 border-b border-[#171717]/10 paper-grain scroll-mt-20 relative">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16">
         
-        {/* Preview Banner */}
-        <div className="mb-6 p-2 bg-[#D7D0C4]/40 border border-[#171717]/15 text-center font-mono text-[11px] text-[#171717]/80 uppercase">
-          {openFloor.previewBanner}
-        </div>
-
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6 pb-6 border-b border-[#171717]/15">
           
